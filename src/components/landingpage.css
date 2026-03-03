@@ -13,7 +13,7 @@
   min-height: 100svh;
   color: var(--landing-text);
   background:
-    linear-gradient(170deg, rgba(2, 12, 22, 0.96), rgba(5, 22, 36, 0.94)),
+    linear-gradient(170deg, rgba(2, 12, 22, 0.64), rgba(5, 22, 36, 0.58)),
     url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1500&q=80') center/cover fixed;
   background-repeat: no-repeat;
   padding-bottom: 56px;
@@ -24,7 +24,7 @@
   top: 0;
   z-index: 30;
   padding: 16px 20px;
-  background: linear-gradient(180deg, rgba(2, 12, 22, 0.95), rgba(2, 12, 22, 0.45), transparent);
+  background: linear-gradient(180deg, rgba(2, 12, 22, 0.72), rgba(2, 12, 22, 0.2), transparent);
   backdrop-filter: blur(8px);
 }
 
@@ -57,11 +57,12 @@
   max-width: 880px;
   width: 100%;
   text-align: center;
-  background: linear-gradient(145deg, rgba(13, 33, 52, 0.85), rgba(13, 33, 52, 0.5));
-  border: 1px solid var(--landing-border);
+  background: linear-gradient(145deg, rgba(13, 33, 52, 0.34), rgba(13, 33, 52, 0.14));
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 24px;
   padding: 38px 28px;
   box-shadow: 0 26px 55px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(3px);
 }
 
 .landing-eyebrow {
@@ -331,36 +332,105 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .landing-wrapper {
+    background-attachment: scroll;
+    background-position: center top;
+  }
+
   .landing-top-brand-area {
-    padding: 14px 14px;
+    padding: 12px 14px;
+    backdrop-filter: blur(4px);
+  }
+
+  .landing-brand-logo {
+    padding: 9px 14px;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
   }
 
   .landing-welcome-section {
-    padding: 40px 14px 20px;
+    padding: 32px 14px 18px;
   }
 
   .landing-welcome-content {
-    padding: 28px 16px;
-    border-radius: 18px;
+    padding: 22px 16px;
+    border-radius: 16px;
+  }
+
+  .landing-welcome-title {
+    font-size: clamp(1.45rem, 6.4vw, 2rem);
+  }
+
+  .landing-welcome-subtitle {
+    font-size: 0.92rem;
   }
 
   .landing-main-content {
-    padding: 0 14px;
+    padding: 0 12px;
   }
 
   .landing-filter-wrapper {
-    padding: 0 14px 20px;
+    padding: 0 12px 18px;
   }
 
   .landing-filter-buttons {
     width: 100%;
-    border-radius: 16px;
-    justify-content: center;
+    border-radius: 14px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .landing-filter-btn {
-    flex: 1;
-    min-width: 95px;
+    width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 0.86rem;
+    text-align: center;
+  }
+
+  .landing-resort-section {
+    margin: 10px 0 22px;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .landing-section-head h2 {
+    font-size: 1.12rem;
+  }
+
+  .landing-section-head p {
+    font-size: 0.9rem;
+  }
+
+  .landing-resorts-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .landing-card-image {
+    height: 180px;
+  }
+
+  .landing-card-content {
+    padding: 14px;
+  }
+
+  .landing-card-content h3 {
+    font-size: 1rem;
+  }
+
+  .landing-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 420px) {
+  .landing-filter-buttons {
+    grid-template-columns: 1fr;
   }
 }

@@ -15,7 +15,7 @@ const SECTION_DESCRIPTIONS = {
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState('budget');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [resorts, setResorts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedResort, setSelectedResort] = useState(null);
@@ -62,6 +62,10 @@ const LandingPage = () => {
 
   const handleFilterSelect = (filterId) => {
     setActiveFilter(filterId);
+    if (filterId === 'all') {
+      navigate('/');
+      return;
+    }
     const selectedCategory = getCategoryByType(filterId);
     if (selectedCategory) {
       navigate(`/category/${selectedCategory.route}`);
@@ -86,7 +90,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <FilterSection activeFilter={activeFilter} onFilterSelect={handleFilterSelect} />
+      <FilterSection activeFilter={activeFilter} onFilterSelect={handleFilterSelect} includeAll />
 
       <main className="landing-main-content">
         {loading ? (

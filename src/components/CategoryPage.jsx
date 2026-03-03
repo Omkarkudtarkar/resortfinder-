@@ -49,6 +49,10 @@ const CategoryPage = () => {
   };
 
   const handleFilterSelect = (filterType) => {
+    if (filterType === 'all') {
+      navigate('/');
+      return;
+    }
     const selectedCategory = getCategoryByType(filterType);
     if (selectedCategory) {
       navigate(`/category/${selectedCategory.route}`);
@@ -90,7 +94,7 @@ const CategoryPage = () => {
         </div>
       </section>
 
-      <FilterSection activeFilter={category.type} onFilterSelect={handleFilterSelect} />
+      <FilterSection activeFilter={category.type} onFilterSelect={handleFilterSelect} includeAll />
 
       <main className="landing-main-content">
         {loading ? (
