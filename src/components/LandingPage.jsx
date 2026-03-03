@@ -1,29 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ResortCard from './ResortCard';
 import FilterSection from './FilterSection';
 import ResortModal from './ResortModal';
 import { supabase } from '../supabaseClient';
+import { CATEGORY_ORDER, getCategoryByType } from './categoryConfig';
+import './landingpage.css';
+
+const SECTION_DESCRIPTIONS = {
+  budget: 'Value-friendly stays without compromising the essentials.',
+  premium: 'Premium stays with elevated comfort and amenities.',
+  bamboo: 'Nature-facing bamboo-style stays and experiences.',
+};
 
 const LandingPage = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState('budget');
   const [resorts, setResorts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedResort, setSelectedResort] = useState(null);
+  const [logoTapCount, setLogoTapCount] = useState(0);
 
-  // Fetch Resorts from Supabase
   const fetchResorts = async () => {
     try {
       setLoading(true);
-      // Select resorts and their associated reviews
-      const { data, error } = await supabase
-        .from('resorts')
-        .select('*, reviews(*)');
-
+      const { data, error } = await supabase.from('resorts').select('*, reviews(*)');
       if (error) throw error;
       setResorts(data || []);
     } catch (error) {
       console.error('Error fetching resorts:', error.message);
-      alert('Failed to load resorts. Check console for details.');
     } finally {
       setLoading(false);
     }
@@ -33,51 +38,92 @@ const LandingPage = () => {
     fetchResorts();
   }, []);
 
-  // Update resort data (used for adding reviews in modal)
+  const handleLogoTap = () => {
+    const nextCount = logoTapCount + 1;
+    setLogoTapCount(nextCount);
+    if (nextCount >= 3) {
+      navigate('/admin');
+    }
+    setTimeout(() => setLogoTapCount(0), 2000);
+  };
+
   const handleResortUpdate = (updatedResort) => {
-    // Optimistic UI update
-    const newResorts = resorts.map(r => r.id === updatedResort.id ? updatedResort : r);
-    setResorts(newResorts);
+    const nextResorts = resorts.map((resort) => (resort.id === updatedResort.id ? updatedResort : resort));
+    setResorts(nextResorts);
     setSelectedResort(updatedResort);
   };
 
-  const filteredResorts = resorts.filter(resort => 
-    activeFilter === 'all' ? true : resort.type === activeFilter
-  );
+  const resortsByType = useMemo(() => {
+    return CATEGORY_ORDER.reduce((acc, section) => {
+      acc[section.type] = resorts.filter((resort) => resort.type === section.type);
+      return acc;
+    }, {});
+  }, [resorts]);
+
+  const handleFilterSelect = (filterId) => {
+    setActiveFilter(filterId);
+    const selectedCategory = getCategoryByType(filterId);
+    if (selectedCategory) {
+      navigate(`/category/${selectedCategory.route}`);
+    }
+  };
 
   return (
-    <div className="landing-page-wrapper">
-      {/* Hero Section */}
-      <div className="hero">
-        <div className="hero-overlay"></div>
-        <div className="hero-content">
-          <h1 className="hero-title-animate">Find Your <span style={{ color: 'var(--primary)' }}>Perfect Stay</span></h1>
-          <p className="hero-sub-animate">Click a resort to see details & reviews.</p>
+    <div className="landing-wrapper">
+      <header className="landing-top-brand-area">
+        <button type="button" className="landing-brand-logo" onClick={handleLogoTap}>
+          Pinoxx Getaways
+        </button>
+      </header>
+
+      <section className="landing-welcome-section">
+        <div className="landing-welcome-content">
+          <p className="landing-eyebrow">Dandeli Experiences</p>
+          <h1 className="landing-welcome-title">Choose Your Perfect Resort Stay</h1>
+          <p className="landing-welcome-subtitle">
+            Pick a category below to open a dedicated page for that stay type.
+          </p>
         </div>
-      </div>
+      </section>
 
-      <FilterSection activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+      <FilterSection activeFilter={activeFilter} onFilterSelect={handleFilterSelect} />
 
-      <div className="resorts-container">
+      <main className="landing-main-content">
         {loading ? (
-          <p style={{ color: 'white', textAlign: 'center' }}>Loading resorts...</p>
-        ) : filteredResorts.length === 0 ? (
-          <p style={{ color: 'white', textAlign: 'center' }}>No resorts found.</p>
+          <div className="landing-loading-spinner" aria-label="Loading resorts" />
         ) : (
-          filteredResorts.map(resort => (
-            <ResortCard 
-              key={resort.id} 
-              resort={resort} 
-              onClick={() => setSelectedResort(resort)} 
-            />
+          CATEGORY_ORDER.map((section) => (
+            <section
+              key={section.type}
+              className="landing-resort-section"
+            >
+              <div className="landing-section-head">
+                <h2>{section.label}</h2>
+                <p>{SECTION_DESCRIPTIONS[section.type]}</p>
+              </div>
+
+              {resortsByType[section.type]?.length ? (
+                <div className="landing-resorts-grid">
+                  {resortsByType[section.type].map((resort) => (
+                    <ResortCard
+                      key={resort.id}
+                      resort={resort}
+                      onClick={() => setSelectedResort(resort)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="landing-no-data-text">No resorts available in this section right now.</p>
+              )}
+            </section>
           ))
         )}
-      </div>
+      </main>
 
       {selectedResort && (
-        <ResortModal 
-          resort={selectedResort} 
-          onClose={() => setSelectedResort(null)} 
+        <ResortModal
+          resort={selectedResort}
+          onClose={() => setSelectedResort(null)}
           onUpdate={handleResortUpdate}
         />
       )}

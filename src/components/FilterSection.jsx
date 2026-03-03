@@ -1,21 +1,17 @@
 import React from 'react';
+import { CATEGORY_ORDER } from './categoryConfig';
 
-const FilterSection = ({ activeFilter, setActiveFilter }) => {
-  const filters = [
-    { id: 'all', label: 'All Stays' },
-    { id: 'budget', label: 'Budget Stay' },
-    { id: 'premium', label: 'Premium Stay' },
-    { id: 'bamboo', label: 'Bamboo Stay' },
-  ];
-
+const FilterSection = ({ activeFilter, onFilterSelect }) => {
   return (
-    <div className="filter-wrapper">
-      <div className="filter-buttons">
-        {filters.map(filter => (
+    <div className="landing-filter-wrapper">
+      <div className="landing-filter-buttons" role="tablist" aria-label="Resort categories">
+        {CATEGORY_ORDER.map((filter) => (
           <button
-            key={filter.id}
-            className={`filter-btn ${activeFilter === filter.id ? 'active' : ''}`}
-            onClick={() => setActiveFilter(filter.id)}
+            key={filter.type}
+            type="button"
+            className={`landing-filter-btn ${activeFilter === filter.type ? 'active' : ''}`}
+            onClick={() => onFilterSelect(filter.type)}
+            aria-pressed={activeFilter === filter.type}
           >
             {filter.label}
           </button>

@@ -1,36 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
-import AdminPanel from './components/AdminPage'; // Renamed from AdminPage
-import './App.css';
+import AdminPanel from './components/AdminPage';
+import CategoryPage from './components/CategoryPage';
 
 function App() {
-  const [currentTab, setCurrentTab] = useState('resorts');
-
   return (
-    <div className="app-container">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="logo">ResortFinder</div>
-        
-        <div className="nav-links">
-          <button 
-            className={`nav-tab ${currentTab === 'resorts' ? 'active' : ''}`}
-            onClick={() => setCurrentTab('resorts')}
-          >
-            Resorts For You
-          </button>
-          <button 
-            className={`nav-tab ${currentTab === 'owner' ? 'active' : ''}`}
-            onClick={() => setCurrentTab('owner')}
-          >
-            Owner
-          </button>
-        </div>
-      </nav>
+    <Router>
+      <Routes>
+        {/* Main Landing Page */}
+        <Route path="/" element={<LandingPage />} />
 
-      {/* Conditional Rendering */}
-      {currentTab === 'resorts' ? <LandingPage /> : <AdminPanel />}
-    </div>
+        {/* Category Pages */}
+        <Route path="/category/:categoryRoute" element={<CategoryPage />} />
+        
+        {/* Admin Panel Route */}
+        <Route path="/admin" element={<AdminPanel />} />
+      </Routes>
+    </Router>
   );
 }
 
