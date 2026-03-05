@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/1200x800?text=Resort+Image';
 const PHONE_NUMBER = '919353431179';
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 const ResortModal = ({ resort, onClose, onUpdate }) => {
   const images = useMemo(
@@ -14,11 +15,14 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [newReview, setNewReview] = useState({ user_name: '', rating: 5, text: '' });
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [lightboxZoom, setLightboxZoom] = useState(1);
+  const [lightboxTouchStartX, setLightboxTouchStartX] = useState(null);
   const [booking, setBooking] = useState({
     checkIn: '',
     checkOut: '',
-    adults: 2,
-    children6to11: 0,
+    adults: '',
+    children6to11: '',
   });
   const [drag, setDrag] = useState({ isDragging: false, startX: 0, offsetX: 0 });
 
@@ -53,15 +57,16 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
 
   const goToIndex = (index) => {
     const lastIndex = images.length - 1;
+    let nextIndex = index;
     if (index < 0) {
-      setActiveIndex(lastIndex);
-      return;
+      nextIndex = lastIndex;
     }
     if (index > lastIndex) {
-      setActiveIndex(0);
-      return;
+      nextIndex = 0;
     }
-    setActiveIndex(index);
+    setActiveIndex(nextIndex);
+    setZoomLevel(1);
+    setLightboxZoom(1);
   };
 
   const goToPrevImage = () => goToIndex(activeIndex - 1);
@@ -100,6 +105,72 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
     transition: drag.isDragging ? 'none' : 'transform 320ms cubic-bezier(0.22, 0.61, 0.36, 1)',
   };
 
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+    setLightboxZoom(1);
+  };
+
+  const adjustZoom = (delta) => {
+    setZoomLevel((prev) => clamp(Number((prev + delta).toFixed(2)), 1, 3));
+  };
+
+  const adjustLightboxZoom = (delta) => {
+    setLightboxZoom((prev) => clamp(Number((prev + delta).toFixed(2)), 1, 4));
+  };
+
+  const handleGalleryWheel = (event) => {
+    event.preventDefault();
+    adjustZoom(event.deltaY < 0 ? 0.2 : -0.2);
+  };
+
+  const handleLightboxWheel = (event) => {
+    event.preventDefault();
+    adjustLightboxZoom(event.deltaY < 0 ? 0.2 : -0.2);
+  };
+
+  const handleLightboxTouchStart = (event) => {
+    setLightboxTouchStartX(event.touches[0].clientX);
+  };
+
+  const handleLightboxTouchEnd = (event) => {
+    if (lightboxTouchStartX === null) return;
+    const deltaX = event.changedTouches[0].clientX - lightboxTouchStartX;
+    if (deltaX > 60) {
+      goToPrevImage();
+    } else if (deltaX < -60) {
+      goToNextImage();
+    }
+    setLightboxTouchStartX(null);
+  };
+
+  const normalizeGuestCount = (rawValue, minValue) => {
+    if (rawValue === '') return '';
+    const digitsOnly = rawValue.replace(/\D/g, '');
+    if (!digitsOnly) return '';
+    return String(Math.max(minValue, Number(digitsOnly)));
+  };
+
+  const getActivityLines = (value) =>
+    String(value || '')
+      .split(/\r?\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+  const renderActivityLines = (value, fallback) => {
+    const lines = getActivityLines(value);
+    if (!lines.length) {
+      return <p>{fallback}</p>;
+    }
+
+    return (
+      <ul className="rm-activity-list">
+        {lines.map((line, index) => (
+          <li key={`${line}-${index}`}>{line}</li>
+        ))}
+      </ul>
+    );
+  };
+
   const handleWhatsAppBooking = () => {
     const message = [
       'Resort Inquiry',
@@ -109,8 +180,8 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
       `Check-out: ${booking.checkOut || 'Not selected'}`,
       '---------------------------',
       'Guests:',
-      `Adults: ${booking.adults}`,
-      `Children (6-11 yrs): ${booking.children6to11}`,
+      `Adults: ${booking.adults || 'Not specified'}`,
+      `Children (6-11 yrs): ${booking.children6to11 || 'Not specified'}`,
       '---------------------------',
       'Please send me more details for this stay.',
     ].join('\n');
@@ -152,7 +223,7 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
 
           <section className="rm-gallery-section">
             <div
-              className="rm-gallery-viewport"
+              className={`rm-gallery-viewport ${zoomLevel > 1 ? 'zoomed' : ''}`}
               onMouseDown={(event) => startDrag(event.clientX)}
               onMouseMove={(event) => moveDrag(event.clientX)}
               onMouseUp={endDrag}
@@ -160,6 +231,7 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
               onTouchStart={(event) => startDrag(event.touches[0].clientX)}
               onTouchMove={(event) => moveDrag(event.touches[0].clientX)}
               onTouchEnd={endDrag}
+              onWheel={handleGalleryWheel}
               onClick={() => {
                 if (!didDragRef.current) {
                   setIsLightboxOpen(true);
@@ -169,21 +241,53 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
               <div className="rm-gallery-track" style={trackStyle}>
                 {images.map((imageUrl, index) => (
                   <div className="rm-gallery-slide" key={`${imageUrl}-${index}`}>
-                    <img src={imageUrl} alt={`${resort.name} ${index + 1}`} />
+                    <img
+                      src={imageUrl}
+                      alt={`${resort.name} ${index + 1}`}
+                      style={index === activeIndex ? { transform: `scale(${zoomLevel})` } : undefined}
+                    />
                   </div>
                 ))}
               </div>
 
-              <button className="rm-gallery-nav prev" onClick={goToPrevImage} type="button" aria-label="Previous image">
+              <button
+                className="rm-gallery-nav prev"
+                onClick={goToPrevImage}
+                onMouseDown={(event) => event.stopPropagation()}
+                onTouchStart={(event) => event.stopPropagation()}
+                type="button"
+                aria-label="Previous image"
+              >
                 {'<'}
               </button>
-              <button className="rm-gallery-nav next" onClick={goToNextImage} type="button" aria-label="Next image">
+              <button
+                className="rm-gallery-nav next"
+                onClick={goToNextImage}
+                onMouseDown={(event) => event.stopPropagation()}
+                onTouchStart={(event) => event.stopPropagation()}
+                type="button"
+                aria-label="Next image"
+              >
                 {'>'}
               </button>
 
               <div className="rm-gallery-meta">
                 <span className="rm-type-badge">{resort.type}</span>
                 <span className="rm-image-count">{activeIndex + 1}/{images.length}</span>
+                <div
+                  className="rm-gallery-zoom-controls"
+                  onClick={(event) => event.stopPropagation()}
+                  onMouseDown={(event) => event.stopPropagation()}
+                  onTouchStart={(event) => event.stopPropagation()}
+                >
+                  <button type="button" onClick={() => adjustZoom(-0.2)} aria-label="Zoom out">
+                    -
+                  </button>
+                  <span>{zoomLevel.toFixed(1)}x</span>
+                  <button type="button" onClick={() => adjustZoom(0.2)} aria-label="Zoom in">
+                    +
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -233,11 +337,11 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
                 <div className="rm-price-row">
                   <div>
                     <span>Sharing</span>
-                    <strong>INR {resort.price_sharing || 'N/A'}</strong>
+                    <strong>Price: {resort.price_sharing || 'N/A'}</strong>
                   </div>
                   <div>
                     <span>Couple</span>
-                    <strong>INR {resort.price_couple || 'N/A'}</strong>
+                    <strong>Price: {resort.price_couple || 'N/A'}</strong>
                   </div>
                 </div>
               </article>
@@ -257,11 +361,17 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
             <div className="rm-activity-grid">
               <article className="rm-card">
                 <h4>Water Activities Included</h4>
-                <p>{resort.water_activities_included || 'Ask the host for included water activities.'}</p>
+                {renderActivityLines(
+                  resort.water_activities_included,
+                  'Ask the host for included water activities.'
+                )}
               </article>
               <article className="rm-card">
                 <h4>Resort Activities Included</h4>
-                <p>{resort.activities_included || 'Ask the host for included resort activities.'}</p>
+                {renderActivityLines(
+                  resort.activities_included,
+                  'Ask the host for included resort activities.'
+                )}
               </article>
             </div>
 
@@ -296,8 +406,12 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
                     type="number"
                     min="1"
                     value={booking.adults}
+                    placeholder="Enter adults count"
                     onChange={(event) =>
-                      setBooking((prev) => ({ ...prev, adults: Math.max(1, Number(event.target.value) || 1) }))
+                      setBooking((prev) => ({
+                        ...prev,
+                        adults: normalizeGuestCount(event.target.value, 1),
+                      }))
                     }
                   />
                 </label>
@@ -308,8 +422,12 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
                     type="number"
                     min="0"
                     value={booking.children6to11}
+                    placeholder="Enter kids count"
                     onChange={(event) =>
-                      setBooking((prev) => ({ ...prev, children6to11: Math.max(0, Number(event.target.value) || 0) }))
+                      setBooking((prev) => ({
+                        ...prev,
+                        children6to11: normalizeGuestCount(event.target.value, 0),
+                      }))
                     }
                   />
                 </label>
@@ -391,11 +509,45 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
       </div>
 
       {isLightboxOpen && (
-        <div className="rm-lightbox" onClick={() => setIsLightboxOpen(false)}>
-          <button className="rm-lightbox-close" type="button" aria-label="Close full screen image">
-            x
-          </button>
-          <img src={currentImage} alt="Full size" className="rm-lightbox-image" />
+        <div className="rm-lightbox" onClick={closeLightbox}>
+          <div className="rm-lightbox-content" onClick={(event) => event.stopPropagation()}>
+            <button className="rm-lightbox-close" type="button" aria-label="Close full screen image" onClick={closeLightbox}>
+              x
+            </button>
+            <button className="rm-lightbox-nav prev" type="button" aria-label="Previous image" onClick={goToPrevImage}>
+              {'<'}
+            </button>
+            <button className="rm-lightbox-nav next" type="button" aria-label="Next image" onClick={goToNextImage}>
+              {'>'}
+            </button>
+
+            <div
+              className="rm-lightbox-image-wrap"
+              onWheel={handleLightboxWheel}
+              onTouchStart={handleLightboxTouchStart}
+              onTouchEnd={handleLightboxTouchEnd}
+            >
+              <img
+                src={currentImage}
+                alt="Full size"
+                className="rm-lightbox-image"
+                style={{ transform: `scale(${lightboxZoom})` }}
+              />
+            </div>
+
+            <div className="rm-lightbox-toolbar">
+              <span>{activeIndex + 1}/{images.length}</span>
+              <div className="rm-lightbox-zoom-controls">
+                <button type="button" onClick={() => adjustLightboxZoom(-0.2)} aria-label="Zoom out image">
+                  -
+                </button>
+                <span>{lightboxZoom.toFixed(1)}x</span>
+                <button type="button" onClick={() => adjustLightboxZoom(0.2)} aria-label="Zoom in image">
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -447,12 +599,16 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
 
         .rm-gallery-viewport {
           position: relative;
-          height: clamp(230px, 40vw, 420px);
+          height: clamp(300px, 54vw, 560px);
           overflow: hidden;
           user-select: none;
           touch-action: pan-y;
           cursor: grab;
           background: #05090d;
+        }
+
+        .rm-gallery-viewport.zoomed {
+          cursor: zoom-out;
         }
 
         .rm-gallery-track {
@@ -464,12 +620,17 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
         .rm-gallery-slide {
           min-width: 100%;
           height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .rm-gallery-slide img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
+          transform-origin: center center;
+          transition: transform 200ms ease;
         }
 
         .rm-gallery-nav {
@@ -503,6 +664,8 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
         }
 
         .rm-type-badge,
@@ -513,6 +676,34 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
           font-weight: 700;
           border: 1px solid rgba(255, 255, 255, 0.2);
           background: rgba(6, 12, 18, 0.62);
+        }
+
+        .rm-gallery-zoom-controls {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 4px 8px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: rgba(6, 12, 18, 0.62);
+        }
+
+        .rm-gallery-zoom-controls button {
+          width: 28px;
+          height: 28px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.06);
+          color: #e6f6ff;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .rm-gallery-zoom-controls span {
+          min-width: 40px;
+          text-align: center;
+          font-size: 0.8rem;
+          color: #d2e4f7;
         }
 
         .rm-thumbnails {
@@ -683,6 +874,15 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
           margin: 0;
           color: #b9cadb;
           line-height: 1.5;
+        }
+
+        .rm-activity-list {
+          margin: 0;
+          padding-left: 18px;
+          color: #b9cadb;
+          line-height: 1.5;
+          display: grid;
+          gap: 4px;
         }
 
         .rm-booking-card {
@@ -868,11 +1068,35 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
           padding: 14px;
         }
 
+        .rm-lightbox-content {
+          position: relative;
+          width: min(1200px, 100%);
+          height: min(92svh, 860px);
+          border-radius: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: rgba(7, 12, 20, 0.96);
+          overflow: hidden;
+          display: grid;
+          grid-template-rows: 1fr auto;
+        }
+
+        .rm-lightbox-image-wrap {
+          min-height: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: auto;
+          padding: 24px;
+          touch-action: pan-y;
+        }
+
         .rm-lightbox-image {
-          max-width: 96%;
-          max-height: 96%;
+          max-width: 100%;
+          max-height: 100%;
           object-fit: contain;
           border-radius: 12px;
+          transform-origin: center center;
+          transition: transform 180ms ease;
         }
 
         .rm-lightbox-close {
@@ -887,6 +1111,63 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
           color: #fff;
           font-weight: 700;
           cursor: pointer;
+          z-index: 3;
+        }
+
+        .rm-lightbox-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 40px;
+          height: 40px;
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          border-radius: 999px;
+          background: rgba(0, 0, 0, 0.44);
+          color: #fff;
+          cursor: pointer;
+          z-index: 2;
+        }
+
+        .rm-lightbox-nav.prev {
+          left: 14px;
+        }
+
+        .rm-lightbox-nav.next {
+          right: 14px;
+        }
+
+        .rm-lightbox-toolbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 10px 14px;
+          border-top: 1px solid rgba(255, 255, 255, 0.12);
+          background: rgba(5, 10, 16, 0.86);
+          color: #d4e5f6;
+          font-size: 0.84rem;
+        }
+
+        .rm-lightbox-zoom-controls {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .rm-lightbox-zoom-controls button {
+          width: 30px;
+          height: 30px;
+          border: 1px solid rgba(255, 255, 255, 0.28);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.07);
+          color: #fff;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .rm-lightbox-zoom-controls span {
+          min-width: 40px;
+          text-align: center;
         }
 
         @keyframes rmFadeIn {
@@ -937,7 +1218,7 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
           }
 
           .rm-gallery-viewport {
-            height: 260px;
+            height: 300px;
           }
 
           .rm-gallery-nav {
@@ -954,6 +1235,23 @@ const ResortModal = ({ resort, onClose, onUpdate }) => {
           .rm-thumb {
             min-width: 58px;
             height: 46px;
+          }
+
+          .rm-lightbox {
+            padding: 8px;
+          }
+
+          .rm-lightbox-content {
+            height: min(95svh, 760px);
+          }
+
+          .rm-lightbox-image-wrap {
+            padding: 10px;
+          }
+
+          .rm-lightbox-nav {
+            width: 34px;
+            height: 34px;
           }
         }
       `}</style>

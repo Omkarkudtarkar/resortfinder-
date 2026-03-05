@@ -9,7 +9,7 @@ import './landingpage.css';
 
 const CATEGORY_DESCRIPTIONS = {
   budget: 'Affordable resorts that keep your stay simple and comfortable.',
-  premium: 'Comfort-focused resorts with upgraded rooms and amenities.',
+  premium: 'Premium resorts with upgraded rooms and amenities.',
   bamboo: 'Bamboo-themed resorts with a nature-first stay experience.',
 };
 
@@ -49,10 +49,6 @@ const CategoryPage = () => {
   };
 
   const handleFilterSelect = (filterType) => {
-    if (filterType === 'all') {
-      navigate('/');
-      return;
-    }
     const selectedCategory = getCategoryByType(filterType);
     if (selectedCategory) {
       navigate(`/category/${selectedCategory.route}`);
@@ -88,13 +84,13 @@ const CategoryPage = () => {
           <p className="landing-eyebrow">Category Page</p>
           <h1 className="landing-welcome-title">{category.label}</h1>
           <p className="landing-welcome-subtitle">{CATEGORY_DESCRIPTIONS[category.type]}</p>
-          <button type="button" className="landing-back-home-btn" onClick={() => navigate('/')}>
+          <button type="button" className="landing-back-home-btn" onClick={() => navigate('/all-categories')}>
             Back To All Categories
           </button>
         </div>
       </section>
 
-      <FilterSection activeFilter={category.type} onFilterSelect={handleFilterSelect} includeAll />
+      <FilterSection activeFilter={category.type} onFilterSelect={handleFilterSelect} />
 
       <main className="landing-main-content">
         {loading ? (

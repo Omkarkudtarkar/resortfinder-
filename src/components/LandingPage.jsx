@@ -62,10 +62,6 @@ const LandingPage = () => {
 
   const handleFilterSelect = (filterId) => {
     setActiveFilter(filterId);
-    if (filterId === 'all') {
-      navigate('/');
-      return;
-    }
     const selectedCategory = getCategoryByType(filterId);
     if (selectedCategory) {
       navigate(`/category/${selectedCategory.route}`);
@@ -90,7 +86,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <FilterSection activeFilter={activeFilter} onFilterSelect={handleFilterSelect} includeAll />
+      <FilterSection activeFilter={activeFilter} onFilterSelect={handleFilterSelect} />
 
       <main className="landing-main-content">
         {loading ? (

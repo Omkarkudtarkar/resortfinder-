@@ -37,7 +37,7 @@ const ResortCard = ({ resort, onClick }) => {
         <p className="landing-card-description">{resort.description?.substring(0, 90) || 'No description available.'}</p>
 
         <div className="landing-card-footer">
-          <div className="landing-price">From INR {displayPrice}</div>
+          <div className="landing-price">Price: {displayPrice}</div>
           <span className="landing-view-btn">View Details</span>
         </div>
       </div>

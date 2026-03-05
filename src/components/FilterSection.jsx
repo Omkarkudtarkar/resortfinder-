@@ -1,15 +1,15 @@
 import React from 'react';
 import { CATEGORY_ORDER } from './categoryConfig';
 
-const FilterSection = ({ activeFilter, onFilterSelect, includeAll = false }) => {
-  const filterOptions = includeAll
-    ? [{ type: 'all', label: 'All Stays' }, ...CATEGORY_ORDER]
-    : CATEGORY_ORDER;
-
+const FilterSection = ({
+  activeFilter,
+  onFilterSelect,
+  categories = CATEGORY_ORDER,
+}) => {
   return (
     <div className="landing-filter-wrapper">
       <div className="landing-filter-buttons" role="tablist" aria-label="Resort categories">
-        {filterOptions.map((filter) => (
+        {categories.map((filter) => (
           <button
             key={filter.type}
             type="button"
