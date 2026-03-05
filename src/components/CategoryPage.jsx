@@ -84,9 +84,6 @@ const CategoryPage = () => {
           <p className="landing-eyebrow">Category Page</p>
           <h1 className="landing-welcome-title">{category.label}</h1>
           <p className="landing-welcome-subtitle">{CATEGORY_DESCRIPTIONS[category.type]}</p>
-          <button type="button" className="landing-back-home-btn" onClick={() => navigate('/all-categories')}>
-            Back To All Categories
-          </button>
         </div>
       </section>
 
