@@ -277,7 +277,7 @@
 }
 
 .landing-price {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #78dcbc;
   font-weight: 700;
 }
@@ -292,6 +292,30 @@
   font-weight: 700;
   background: var(--landing-accent-soft);
   color: #93f0d4;
+}
+
+.landing-main-content-filtered .landing-card-tag {
+  font-size: 0.76rem;
+}
+
+.landing-main-content-filtered .landing-card-content h3 {
+  font-size: 1.18rem;
+}
+
+.landing-main-content-filtered .landing-card-location {
+  font-size: 0.96rem;
+}
+
+.landing-main-content-filtered .landing-card-description {
+  font-size: 0.98rem;
+}
+
+.landing-main-content-filtered .landing-view-btn {
+  font-size: 0.82rem;
+}
+
+.landing-main-content-filtered .landing-price {
+  font-size: 1.1rem;
 }
 
 .landing-loading-spinner {
@@ -424,6 +448,26 @@
 
   .landing-card-content h3 {
     font-size: 1rem;
+  }
+
+  .landing-main-content-filtered .landing-card-content h3 {
+    font-size: 1.06rem;
+  }
+
+  .landing-main-content-filtered .landing-card-location {
+    font-size: 0.92rem;
+  }
+
+  .landing-main-content-filtered .landing-card-description {
+    font-size: 0.94rem;
+  }
+
+  .landing-main-content-filtered .landing-view-btn {
+    font-size: 0.8rem;
+  }
+
+  .landing-main-content-filtered .landing-price {
+    font-size: 1.02rem;
   }
 
   .landing-card-footer {

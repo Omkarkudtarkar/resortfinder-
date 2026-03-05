@@ -89,7 +89,7 @@ const CategoryPage = () => {
 
       <FilterSection activeFilter={category.type} onFilterSelect={handleFilterSelect} />
 
-      <main className="landing-main-content">
+      <main className="landing-main-content landing-main-content-filtered">
         {loading ? (
           <div className="landing-loading-spinner" aria-label="Loading resorts" />
         ) : categoryResorts.length ? (
