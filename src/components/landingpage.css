@@ -264,6 +264,7 @@
   color: #c7d3df;
   line-height: 1.45;
   font-size: 0.92rem;
+  white-space: pre-line;
 }
 
 .landing-card-footer {

@@ -18,12 +18,6 @@ const formatPriceWithPP = (value) => {
   return `${text} PP`;
 };
 
-const getDescriptionPreview = (description) => {
-  const text = String(description || '').trim();
-  if (!text) return 'No description available.';
-  return text.length > 90 ? `${text.slice(0, 90)}...` : text;
-};
-
 const ResortCard = ({ resort, onClick }) => {
   const mainImage = resort.images && resort.images.length > 0
     ? resort.images[0]
@@ -31,7 +25,7 @@ const ResortCard = ({ resort, onClick }) => {
 
   const animationDelay = getAnimationDelay(resort.id);
   const displayPrice = formatPriceWithPP(resort.price_sharing || resort.price);
-  const descriptionPreview = getDescriptionPreview(resort.description);
+  const descriptionText = String(resort.description || '').trim();
 
   return (
     <button
@@ -50,7 +44,7 @@ const ResortCard = ({ resort, onClick }) => {
         <p className="landing-card-location">
           Location: {resort.location || 'Not specified'}
         </p>
-        <p className="landing-card-description">{descriptionPreview}</p>
+        {descriptionText && <p className="landing-card-description">{descriptionText}</p>}
 
         <div className="landing-card-footer">
           <div className="landing-price">Price: {displayPrice}</div>

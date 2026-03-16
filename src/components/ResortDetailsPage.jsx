@@ -30,6 +30,7 @@ const ResortDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isImageOpen, setIsImageOpen] = useState(false);
   const [newReview, setNewReview] = useState({ user_name: '', rating: 5, text: '' });
   const [booking, setBooking] = useState({
     checkIn: '',
@@ -80,6 +81,7 @@ const ResortDetailsPage = () => {
 
   useEffect(() => {
     setActiveImageIndex(0);
+    setIsImageOpen(false);
   }, [resortId]);
 
   const images = useMemo(() => {
@@ -225,7 +227,12 @@ const ResortDetailsPage = () => {
         {images.length > 0 && (
           <section className="resort-gallery-card">
             <div className="resort-hero-image-wrap">
-              <img src={currentImage} alt={resort.name} className="resort-hero-image" />
+              <img
+                src={currentImage}
+                alt={resort.name}
+                className="resort-hero-image"
+                onClick={() => setIsImageOpen(true)}
+              />
               {images.length > 1 && (
                 <>
                   <button type="button" className="resort-gallery-nav prev" onClick={handlePrevImage}>
@@ -440,12 +447,28 @@ const ResortDetailsPage = () => {
         </section>
       </main>
 
+      {isImageOpen && currentImage && (
+        <div className="resort-lightbox" onClick={() => setIsImageOpen(false)}>
+          <div className="resort-lightbox-content" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              className="resort-lightbox-close"
+              onClick={() => setIsImageOpen(false)}
+              aria-label="Close image preview"
+            >
+              x
+            </button>
+            <img src={currentImage} alt={`${resort.name} preview`} className="resort-lightbox-image" />
+          </div>
+        </div>
+      )}
+
       <style>{`
         .resort-page {
           min-height: 100svh;
-          color: #0f0f0f;
+          color: #e6eef7;
           background:
-            linear-gradient(180deg, rgba(195, 193, 193, 0.45), rgba(236, 236, 236, 0.48)),
+            linear-gradient(170deg, rgba(2, 12, 22, 0.7), rgba(5, 22, 36, 0.72)),
             url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1500&q=80') center/cover fixed;
           padding-bottom: 42px;
         }
@@ -463,15 +486,15 @@ const ResortDetailsPage = () => {
           top: 0;
           z-index: 30;
           padding: 14px 16px;
-          background: rgba(255, 255, 255, 0.9);
+          background: rgba(4, 14, 24, 0.8);
           backdrop-filter: blur(6px);
-          border-bottom: 1px solid #d8d8d8;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .resort-back-btn {
-          border: 1px solid #cfcfcf;
-          background: #ffffff;
-          color: #2a2a2a;
+          border: 1px solid rgba(31, 191, 143, 0.45);
+          background: rgba(31, 191, 143, 0.12);
+          color: #cdf9eb;
           border-radius: 999px;
           padding: 9px 15px;
           font-size: 0.88rem;
@@ -488,23 +511,24 @@ const ResortDetailsPage = () => {
         }
 
         .resort-gallery-card {
-          background: #ffffff;
-          border: 1px solid #dddddd;
+          background: #0d2134;
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 18px;
           overflow: hidden;
-          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 18px 32px rgba(0, 0, 0, 0.25);
         }
 
         .resort-hero-image-wrap {
           position: relative;
           height: clamp(240px, 48vw, 480px);
-          background: #f0f0f0;
+          background: #060f17;
         }
 
         .resort-hero-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          cursor: zoom-in;
         }
 
         .resort-gallery-nav {
@@ -515,11 +539,11 @@ const ResortDetailsPage = () => {
           height: 38px;
           border: none;
           border-radius: 999px;
-          background: rgba(255, 255, 255, 0.95);
-          color: #222222;
+          background: rgba(8, 16, 24, 0.65);
+          color: #f8fffc;
           font-size: 1.1rem;
           cursor: pointer;
-          border: 1px solid #d2d2d2;
+          border: none;
         }
 
         .resort-gallery-nav.prev {
@@ -535,7 +559,7 @@ const ResortDetailsPage = () => {
           gap: 8px;
           padding: 10px;
           overflow-x: auto;
-          background: #f5f5f5;
+          background: #0b1622;
         }
 
         .resort-thumb {
@@ -558,7 +582,7 @@ const ResortDetailsPage = () => {
 
         .resort-thumb.active {
           opacity: 1;
-          border-color: #2f2f2f;
+          border-color: #1fbf8f;
         }
 
         .resort-content {
@@ -567,8 +591,8 @@ const ResortDetailsPage = () => {
         }
 
         .resort-info-card {
-          background: #ffffff;
-          border: 1px solid #dddddd;
+          background: #0d2134;
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 16px;
           padding: 16px;
         }
@@ -581,13 +605,13 @@ const ResortDetailsPage = () => {
         }
 
         .resort-location {
-          color: #5a5a5a;
+          color: #9fb4c8;
           margin-bottom: 10px;
         }
 
         .resort-description {
           line-height: 1.55;
-          color: #303030;
+          color: #c7d3df;
           margin-bottom: 0;
         }
 
@@ -599,21 +623,21 @@ const ResortDetailsPage = () => {
 
         .resort-highlight-grid p {
           margin: 8px 0 0;
-          color: #2f2f2f;
+          color: #c8d9ea;
         }
 
         .resort-highlight-grid p span {
-          color: #111111;
+          color: #8ce9cb;
           font-weight: 700;
         }
 
         .resort-food-card {
-          border-color: #cccccc;
-          background: #fafafa;
+          border-color: rgba(255, 255, 255, 0.1);
+          background: #0d2134;
         }
 
         .resort-food-text {
-          color: #111111;
+          color: #e6eef7;
           font-size: 1.05rem;
           font-weight: 700;
         }
@@ -621,7 +645,7 @@ const ResortDetailsPage = () => {
         .resort-info-card ul {
           margin: 8px 0 0;
           padding-left: 18px;
-          color: #2f2f2f;
+          color: #c8d9ea;
         }
 
         .resort-booking-grid {
@@ -633,7 +657,7 @@ const ResortDetailsPage = () => {
         .resort-booking-grid label {
           display: grid;
           gap: 6px;
-          color: #505050;
+          color: #a9bed3;
           font-size: 0.9rem;
         }
 
@@ -641,10 +665,10 @@ const ResortDetailsPage = () => {
         .resort-review-form input,
         .resort-review-form select,
         .resort-review-form textarea {
-          background: #ffffff;
-          border: 1px solid #cfcfcf;
+          background: #091725;
+          border: 1px solid #2b435c;
           border-radius: 10px;
-          color: #222222;
+          color: #e8f2fc;
           min-height: 42px;
           padding: 10px;
           font-size: 0.95rem;
@@ -654,7 +678,7 @@ const ResortDetailsPage = () => {
           margin-top: 12px;
           border: none;
           border-radius: 12px;
-          background: #1f1f1f;
+          background: linear-gradient(135deg, #25d366, #1aaf54);
           color: #fff;
           font-weight: 700;
           font-size: 0.95rem;
@@ -670,9 +694,9 @@ const ResortDetailsPage = () => {
         }
 
         .resort-review-item {
-          border: 1px solid #dcdcdc;
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 12px;
-          background: #fafafa;
+          background: #0a1a2a;
           padding: 12px;
         }
 
@@ -680,24 +704,24 @@ const ResortDetailsPage = () => {
           display: flex;
           justify-content: space-between;
           gap: 10px;
-          color: #5a5a5a;
+          color: #aac0d6;
           font-size: 0.84rem;
         }
 
         .resort-review-rating {
           margin: 8px 0 6px;
-          color: #1f1f1f;
+          color: #ffd76c;
           letter-spacing: 0.08em;
         }
 
         .resort-review-form {
           margin-top: 12px;
-          border: 1px solid #dcdcdc;
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 12px;
           padding: 12px;
           display: grid;
           gap: 10px;
-          background: #fafafa;
+          background: #0a1a2a;
         }
 
         .resort-review-form h4 {
@@ -718,7 +742,7 @@ const ResortDetailsPage = () => {
         .resort-review-form button {
           border: none;
           border-radius: 10px;
-          background: #1f1f1f;
+          background: linear-gradient(135deg, #22bf8f, #168d69);
           color: #fff;
           min-height: 42px;
           font-weight: 700;
@@ -735,7 +759,50 @@ const ResortDetailsPage = () => {
 
         .resort-error p {
           margin: 0;
-          color: #505050;
+          color: #c7d3df;
+        }
+
+        .resort-lightbox {
+          position: fixed;
+          inset: 0;
+          z-index: 3000;
+          background: rgba(0, 0, 0, 0.82);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+        }
+
+        .resort-lightbox-content {
+          position: relative;
+          width: min(1100px, 100%);
+          max-height: 92svh;
+          border-radius: 16px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: #050b13;
+        }
+
+        .resort-lightbox-image {
+          width: 100%;
+          height: 100%;
+          max-height: 92svh;
+          object-fit: contain;
+          display: block;
+        }
+
+        .resort-lightbox-close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 34px;
+          height: 34px;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          background: rgba(0, 0, 0, 0.45);
+          color: #ffffff;
+          font-weight: 700;
+          cursor: pointer;
         }
 
         @media (max-width: 860px) {
