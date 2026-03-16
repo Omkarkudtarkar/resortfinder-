@@ -26,6 +26,7 @@ const ResortCard = ({ resort, onClick }) => {
   const animationDelay = getAnimationDelay(resort.id);
   const displayPrice = formatPriceWithPP(resort.price_sharing || resort.price);
   const descriptionText = String(resort.description || '').trim();
+  const activityDistance = String(resort.water_activity_distance || '').trim();
 
   return (
     <button
@@ -44,6 +45,11 @@ const ResortCard = ({ resort, onClick }) => {
         <p className="landing-card-location">
           Location: {resort.location || 'Not specified'}
         </p>
+        {activityDistance && (
+          <p className="landing-card-distance">
+            Water activities distance: {activityDistance}
+          </p>
+        )}
         {descriptionText && <p className="landing-card-description">{descriptionText}</p>}
 
         <div className="landing-card-footer">

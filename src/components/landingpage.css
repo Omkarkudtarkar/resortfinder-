@@ -259,6 +259,12 @@
   font-size: 0.9rem;
 }
 
+.landing-card-distance {
+  margin: 6px 0 0;
+  color: #8ce9cb;
+  font-size: 0.88rem;
+}
+
 .landing-card-description {
   margin: 10px 0 0;
   color: #c7d3df;
@@ -305,6 +311,10 @@
 
 .landing-main-content-filtered .landing-card-location {
   font-size: 0.96rem;
+}
+
+.landing-main-content-filtered .landing-card-distance {
+  font-size: 0.92rem;
 }
 
 .landing-main-content-filtered .landing-card-description {
@@ -457,6 +467,10 @@
 
   .landing-main-content-filtered .landing-card-location {
     font-size: 0.92rem;
+  }
+
+  .landing-main-content-filtered .landing-card-distance {
+    font-size: 0.9rem;
   }
 
   .landing-main-content-filtered .landing-card-description {
