@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import FilterSection from './FilterSection';
 import ResortCard from './ResortCard';
-import ResortModal from './ResortModal';
 import { supabase } from '../supabaseClient';
 import { getCategoryByRoute, getCategoryByType } from './categoryConfig';
 import './landingpage.css';
@@ -15,12 +14,13 @@ const CATEGORY_DESCRIPTIONS = {
 
 const CategoryPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { categoryRoute } = useParams();
   const category = getCategoryByRoute(categoryRoute);
   const [resorts, setResorts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedResort, setSelectedResort] = useState(null);
   const [logoTapCount, setLogoTapCount] = useState(0);
+  const scrollStorageKey = `list-scroll:${location.pathname}`;
 
   useEffect(() => {
     if (!category) return;
@@ -39,6 +39,16 @@ const CategoryPage = () => {
     fetchResorts();
   }, [category]);
 
+  useEffect(() => {
+    if (loading) return;
+    const savedScroll = sessionStorage.getItem(scrollStorageKey);
+    if (!savedScroll) return;
+    requestAnimationFrame(() => {
+      window.scrollTo(0, Number(savedScroll));
+      sessionStorage.removeItem(scrollStorageKey);
+    });
+  }, [loading, scrollStorageKey]);
+
   const handleLogoTap = () => {
     const nextCount = logoTapCount + 1;
     setLogoTapCount(nextCount);
@@ -55,17 +65,20 @@ const CategoryPage = () => {
     }
   };
 
-  const handleResortUpdate = (updatedResort) => {
-    setResorts((currentResorts) =>
-      currentResorts.map((resort) => (resort.id === updatedResort.id ? updatedResort : resort))
-    );
-    setSelectedResort(updatedResort);
-  };
-
   const categoryResorts = useMemo(() => {
     if (!category) return [];
     return resorts.filter((resort) => resort.type === category.type);
   }, [category, resorts]);
+
+  const handleOpenResort = (resort) => {
+    sessionStorage.setItem(scrollStorageKey, String(window.scrollY));
+    navigate(`/resort/${resort.id}`, {
+      state: {
+        resort,
+        from: location.pathname,
+      },
+    });
+  };
 
   if (!category) {
     return <Navigate to="/" replace />;
@@ -99,7 +112,7 @@ const CategoryPage = () => {
                 <ResortCard
                   key={resort.id}
                   resort={resort}
-                  onClick={() => setSelectedResort(resort)}
+                  onClick={() => handleOpenResort(resort)}
                 />
               ))}
             </div>
@@ -110,14 +123,6 @@ const CategoryPage = () => {
           </section>
         )}
       </main>
-
-      {selectedResort && (
-        <ResortModal
-          resort={selectedResort}
-          onClose={() => setSelectedResort(null)}
-          onUpdate={handleResortUpdate}
-        />
-      )}
     </div>
   );
 };

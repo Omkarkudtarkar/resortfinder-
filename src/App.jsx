@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LandingPage from './components/LandingPage';
 import AdminPanel from './components/AdminPage';
 import CategoryPage from './components/CategoryPage';
+import ResortDetailsPage from './components/ResortDetailsPage';
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
 
         {/* Category Pages */}
         <Route path="/category/:categoryRoute" element={<CategoryPage />} />
+
+        {/* Resort Details */}
+        <Route path="/resort/:resortId" element={<ResortDetailsPage />} />
         
         {/* Admin Panel Route */}
         <Route path="/admin" element={<AdminPanel />} />
