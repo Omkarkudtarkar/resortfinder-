@@ -309,7 +309,7 @@ const ResortDetailsPage = () => {
 
           {waterActivities.length > 0 && (
             <article className="resort-info-card">
-              <h3>Water & Rope Activities Included</h3>
+              <h3>Water Activities Included</h3>
               <ul>
                 {waterActivities.map((activity, index) => (
                   <li key={`${activity}-${index}`}>{activity}</li>
@@ -320,7 +320,7 @@ const ResortDetailsPage = () => {
 
           {resortActivities.length > 0 && (
             <article className="resort-info-card">
-              <h3>Resort Activities Included</h3>
+              <h3>Resort & Rope Activities Included</h3>
               <ul>
                 {resortActivities.map((activity, index) => (
                   <li key={`${activity}-${index}`}>{activity}</li>
@@ -423,7 +423,7 @@ const ResortDetailsPage = () => {
                   value={newReview.user_name}
                   onChange={(event) => setNewReview((prev) => ({ ...prev, user_name: event.target.value }))}
                   required
-                />Water & Rope Activities Included
+                />
                 <select
                   value={newReview.rating}
                   onChange={(event) => setNewReview((prev) => ({ ...prev, rating: Number(event.target.value) }))}
