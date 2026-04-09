@@ -327,7 +327,7 @@ const ResortDetailsPage = () => {
                 ))}
               </ul>
             </article>
-          )}4
+          )}
 
           {paidActivities.length > 0 && (
             <article className="resort-info-card">
