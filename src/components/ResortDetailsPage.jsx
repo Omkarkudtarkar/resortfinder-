@@ -280,7 +280,7 @@ const ResortDetailsPage = () => {
               )}
               {waterActivityDistance && (
                 <p>
-                  <span>Water Activities Distance:</span> {waterActivityDistance}
+                  <span>Water % Rope Activities Distance:</span> {waterActivityDistance}
                 </p>
               )}
             </article>
@@ -320,14 +320,14 @@ const ResortDetailsPage = () => {
 
           {resortActivities.length > 0 && (
             <article className="resort-info-card">
-              <h3>Resort & Rope Activities Included</h3>
+              <h3>Resort Activities Included</h3>
               <ul>
                 {resortActivities.map((activity, index) => (
                   <li key={`${activity}-${index}`}>{activity}</li>
                 ))}
               </ul>
             </article>
-          )}
+          )}4
 
           {paidActivities.length > 0 && (
             <article className="resort-info-card">
